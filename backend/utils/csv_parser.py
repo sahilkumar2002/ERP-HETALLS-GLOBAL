@@ -19,7 +19,7 @@ def parse_amazon_orders(csv_content: str):
         date_str = row.get('purchase-date') or row.get('PurchaseDate') or ''
         try:
             # Amazon dates often look like 2026-07-15T14:30:00+00:00
-            order_date = datetime.fromisoformat(date_str.split('+')[0]) if date_str else datetime.utcnow()
+            order_date = datetime.fromisoformat(date_str[:19]) if date_str else datetime.utcnow()
         except Exception:
             order_date = datetime.utcnow()
             

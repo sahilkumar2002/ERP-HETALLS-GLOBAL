@@ -32,9 +32,15 @@ async def upload_csv(
         raise HTTPException(status_code=400, detail="Invalid platform")
         
     inserted = 0
+    seen_ids = set()
     for o_data in parsed_orders:
+        oid = o_data['order_id']
+        if oid in seen_ids:
+            continue
+        seen_ids.add(oid)
+        
         # Check if exists
-        existing = db.query(Order).filter(Order.order_id == o_data['order_id']).first()
+        existing = db.query(Order).filter(Order.order_id == oid).first()
         if not existing:
             new_order = Order(**o_data)
             db.add(new_order)
