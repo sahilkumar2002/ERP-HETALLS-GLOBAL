@@ -1,0 +1,12 @@
+node_modules/
+__pycache__/
+*.pyc
+venv/
+env/
+.env
+dist/
+build/
+.DS_Store
+cloudflared.exe
+ngrok.exe
+ngrok.zip

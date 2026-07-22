@@ -1,0 +1,285 @@
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import { useAuth } from '../context/AuthContext'
+import { Shield, User, Building2, Plus, Trash2, Edit2, Check, X } from 'lucide-react'
+
+const ROLES = ['admin', 'accountant', 'ecommerce', 'warehouse', 'hr', 'analyst', 'viewer']
+const DEPARTMENTS = ['IT', 'Accounts', 'E-Commerce', 'HR', 'Inventory', 'Marketing', 'General']
+const AVAILABLE_PERMISSIONS = ['dashboard', 'ecommerce', 'inventory', 'accounts', 'hr', 'reports']
+const ROLE_COLORS = {
+  admin:      'var(--danger)',
+  accountant: 'var(--info)',
+  ecommerce:  'var(--gold)',
+  warehouse:  'var(--success)',
+  hr:         '#ec4899',
+  analyst:    '#8b5cf6',
+  viewer:     'var(--text-muted)',
+}
+
+export default function Settings() {
+  const { API, user: me } = useAuth()
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showAdd, setShowAdd] = useState(false)
+  const [editId, setEditId] = useState(null)
+  const [editForm, setEditForm] = useState({})
+  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'viewer', department: 'General' })
+  const [msg, setMsg] = useState(null)
+
+  const fetchUsers = () => {
+    setLoading(true)
+    axios.get(`${API}/api/users/`)
+      .then(r => setUsers(r.data))
+      .catch(console.error)
+      .finally(() => setLoading(false))
+  }
+  useEffect(() => { fetchUsers() }, [API])
+
+  const showMsg = (type, text) => { setMsg({ type, text }); setTimeout(() => setMsg(null), 4000) }
+
+  const handleAddUser = async (e) => {
+    e.preventDefault()
+    try {
+      await axios.post(`${API}/api/auth/register`, newUser)
+      showMsg('success', `User "${newUser.name}" created successfully.`)
+      setNewUser({ name: '', email: '', password: '', role: 'viewer', department: 'General' })
+      setShowAdd(false)
+      fetchUsers()
+    } catch (err) {
+      showMsg('error', err.response?.data?.detail || 'Failed to create user.')
+    }
+  }
+
+  const handleEdit = (u) => { setEditId(u.id); setEditForm({ role: u.role, department: u.department, permissions: u.permissions || [] }) }
+
+  const handleSaveEdit = async (id) => {
+    try {
+      await axios.put(`${API}/api/users/${id}`, editForm)
+      showMsg('success', 'User updated.')
+      setEditId(null)
+      fetchUsers()
+    } catch (err) {
+      showMsg('error', 'Failed to update user.')
+    }
+  }
+
+  const handleDelete = async (id, name) => {
+    if (!window.confirm(`Remove ${name} from the system?`)) return
+    try {
+      await axios.delete(`${API}/api/users/${id}`)
+      showMsg('success', `${name} removed.`)
+      fetchUsers()
+    } catch (err) {
+      showMsg('error', 'Failed to delete user.')
+    }
+  }
+
+  const isAdmin = me?.role === 'admin'
+
+  return (
+    <div>
+      {/* Company Info Card */}
+      <div className="card mb-6">
+        <div className="card-header">
+          <div>
+            <div className="card-title">Company Profile</div>
+            <div className="card-subtitle">System-wide configuration</div>
+          </div>
+          <Building2 size={20} style={{ color: 'var(--text-muted)' }} />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+          {[
+            { label: 'Company Name',   value: 'Hetalls Inc.' },
+            { label: 'Currency',       value: 'USD ($)' },
+            { label: 'Platforms',      value: 'Amazon FBA, Etsy' },
+            { label: 'ERP Version',    value: '1.0.0 — Phase 4' },
+            { label: 'Database',       value: 'SQLite (Dev)' },
+            { label: 'Backend',        value: 'Python FastAPI' },
+          ].map(item => (
+            <div key={item.label} style={{ background: 'var(--bg-surface)', borderRadius: 8, padding: '12px 16px' }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{item.label}</div>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>{item.value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Flash Message */}
+      {msg && (
+        <div style={{
+          background: msg.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+          border: `1px solid ${msg.type === 'success' ? 'var(--success)' : 'var(--danger)'}`,
+          color: msg.type === 'success' ? 'var(--success)' : 'var(--danger)',
+          borderRadius: 8, padding: '10px 16px', fontSize: 13, fontWeight: 600, marginBottom: 16
+        }}>
+          {msg.text}
+        </div>
+      )}
+
+      {/* User Management Card */}
+      <div className="card">
+        <div className="card-header">
+          <div>
+            <div className="card-title">User Management</div>
+            <div className="card-subtitle">{users.length} registered users — manage roles and departments</div>
+          </div>
+          {isAdmin && (
+            <button
+              onClick={() => setShowAdd(!showAdd)}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--gold-glow)', border: '1px solid var(--border-accent)', color: 'var(--gold)', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+            >
+              <Plus size={16} /> Add User
+            </button>
+          )}
+        </div>
+
+        {/* Add User Form */}
+        {showAdd && isAdmin && (
+          <form onSubmit={handleAddUser} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 20, marginBottom: 20, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
+            <div>
+              <label className="form-label">Full Name</label>
+              <input className="form-input" placeholder="Jane Smith" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} required />
+            </div>
+            <div>
+              <label className="form-label">Email</label>
+              <input className="form-input" type="email" placeholder="jane@hetalls.com" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} required />
+            </div>
+            <div>
+              <label className="form-label">Password</label>
+              <input className="form-input" type="password" placeholder="••••••••" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} required />
+            </div>
+            <div>
+              <label className="form-label">Role</label>
+              <select className="form-input" value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})}>
+                {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="form-label">Department</label>
+              <select className="form-input" value={newUser.department} onChange={e => setNewUser({...newUser, department: e.target.value})}>
+                {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+              <button type="submit" className="btn-primary" style={{ width: 'auto', padding: '10px 20px' }}>Create</button>
+              <button type="button" onClick={() => setShowAdd(false)} style={{ padding: '10px 16px', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-secondary)', cursor: 'pointer' }}>Cancel</button>
+            </div>
+          </form>
+        )}
+
+        {/* Users Table */}
+        <div className="table-wrapper">
+          {loading ? <div className="page-loading" style={{ height: 100 }}><div className="spinner" /></div> : (
+            <table>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Permissions</th>
+                  <th>Department</th>
+                  <th>Status</th>
+                  {isAdmin && <th>Actions</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {users.map(u => (
+                  <tr key={u.id}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div className="user-avatar" style={{ width: 28, height: 28, fontSize: 11 }}>
+                          {u.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        </div>
+                        <span style={{ fontWeight: 600 }}>{u.name}</span>
+                        {u.id === me?.id && <span style={{ fontSize: 10, color: 'var(--gold)', background: 'var(--gold-glow)', padding: '1px 6px', borderRadius: 10 }}>YOU</span>}
+                      </div>
+                    </td>
+                    <td style={{ fontSize: 13 }}>{u.email}</td>
+                    <td>
+                      {editId === u.id ? (
+                        <select className="form-input" style={{ padding: '4px 8px', fontSize: 12 }}
+                          value={editForm.role}
+                          onChange={e => setEditForm({...editForm, role: e.target.value})}>
+                          {ROLES.map(r => <option key={r}>{r}</option>)}
+                        </select>
+                      ) : (
+                        <span className="badge" style={{ background: `${ROLE_COLORS[u.role] || '#888'}22`, color: ROLE_COLORS[u.role] || '#888' }}>
+                          <Shield size={10} /> {u.role}
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      {editId === u.id ? (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                          {AVAILABLE_PERMISSIONS.map(p => (
+                            <label key={p} style={{ fontSize: 11, display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+                              <input 
+                                type="checkbox" 
+                                checked={editForm.permissions?.includes(p)} 
+                                onChange={(e) => {
+                                  const nextPerms = e.target.checked 
+                                    ? [...(editForm.permissions || []), p] 
+                                    : (editForm.permissions || []).filter(x => x !== p)
+                                  setEditForm({ ...editForm, permissions: nextPerms })
+                                }} 
+                                style={{ width: 12, height: 12 }} 
+                              />
+                              {p}
+                            </label>
+                          ))}
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                          {u.permissions?.map(p => (
+                            <span key={p} className="badge" style={{ fontSize: 9, padding: '2px 4px', background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
+                              {p}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      {editId === u.id ? (
+                        <select className="form-input" style={{ padding: '4px 8px', fontSize: 12 }}
+                          value={editForm.department}
+                          onChange={e => setEditForm({...editForm, department: e.target.value})}>
+                          {DEPARTMENTS.map(d => <option key={d}>{d}</option>)}
+                        </select>
+                      ) : (
+                        <span style={{ fontSize: 13 }}>{u.department}</span>
+                      )}
+                    </td>
+                    <td>
+                      <span className={`badge ${u.is_active ? 'badge-paid' : 'badge-returned'}`}>
+                        {u.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    {isAdmin && (
+                      <td>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          {editId === u.id ? (
+                            <>
+                              <button onClick={() => handleSaveEdit(u.id)} style={{ background: 'none', color: 'var(--success)', padding: 4 }}><Check size={16} /></button>
+                              <button onClick={() => setEditId(null)} style={{ background: 'none', color: 'var(--danger)', padding: 4 }}><X size={16} /></button>
+                            </>
+                          ) : (
+                            <>
+                              <button onClick={() => handleEdit(u)} style={{ background: 'none', color: 'var(--gold)', padding: 4 }}><Edit2 size={15} /></button>
+                              {u.id !== me?.id && (
+                                <button onClick={() => handleDelete(u.id, u.name)} style={{ background: 'none', color: 'var(--danger)', padding: 4 }}><Trash2 size={15} /></button>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
