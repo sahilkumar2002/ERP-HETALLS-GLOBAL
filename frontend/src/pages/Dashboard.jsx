@@ -30,9 +30,10 @@ const ChartTooltip = ({ active, payload, label }) => {
 
 // ── KPI Card ──────────────────────────────────────────────────────────
 function KPICard({ icon: Icon, label, value, sub, colorClass, prefix = '', format = 'number' }) {
-  const display = format === 'currency'
-    ? `$${Number(value).toLocaleString('en-US', { minimumFractionDigits: 0 })}`
-    : Number(value).toLocaleString()
+  let display = value
+  if (format === 'currency') display = `$${Number(value).toLocaleString('en-US', { minimumFractionDigits: 0 })}`
+  else if (format === 'number') display = Number(value).toLocaleString()
+  
   return (
     <div className="kpi-card">
       <div className="kpi-header">
