@@ -232,7 +232,6 @@ export default function Dashboard() {
               <div>
                 <h3 style={{ fontSize: '18px', fontWeight: 700 }}>Daily Sale Brands & Portal</h3>
                 <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                  {bdTab === 'today' && `Today — ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`}
                   {bdTab === 'all' && 'All Data'}
                   {bdTab.startsWith('month|') && `Month — ${bdTab.split('|')[1]}`}
                   {bdTab === 'custom' && `Custom — ${bdCustomDate} ${bdCustomEndDate ? 'to ' + bdCustomEndDate : ''}`}
@@ -242,7 +241,6 @@ export default function Dashboard() {
             </div>
             <div className="breakdown-tabs">
               <button className={`breakdown-tab ${bdTab === 'all' ? 'active' : ''}`} onClick={() => handleBdTab('all')}><List size={14} /> All</button>
-              <button className={`breakdown-tab ${bdTab === 'today' ? 'active' : ''}`} onClick={() => handleBdTab('today')}><Clock size={14} /> Today</button>
               {last3Months.map(m => (
                 <button key={m.value} className={`breakdown-tab ${bdTab === m.value ? 'active' : ''}`} onClick={() => handleBdTab(m.value)}>
                   <Calendar size={14} /> {m.label}

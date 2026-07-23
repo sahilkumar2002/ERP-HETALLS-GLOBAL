@@ -101,14 +101,14 @@ def daily_sales(date: str = Query(default="today"), current_user=Depends(get_cur
         
         rows.append(row)
         
-    # Sort ascending by date
+    # Sort descending by date (newest first)
     def get_date(r):
         try:
             return datetime.strptime(r[0].strip(), "%d-%b-%Y").date()
         except:
             return datetime.min.date()
             
-    rows.sort(key=get_date)
+    rows.sort(key=get_date, reverse=True)
     
     return {
         "headers": headers,
