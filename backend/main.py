@@ -15,6 +15,20 @@ app.add_middleware(
 # Create DB tables on startup
 create_tables()
 
+# Ensure admin user is updated
+try:
+    from database import SessionLocal, User
+    from auth import hash_password
+    db = SessionLocal()
+    admin = db.query(User).filter(User.role == "admin").first()
+    if admin:
+        admin.email = "IT@heatlls.com"
+        admin.hashed_password = hash_password("HetallsF3&##$$$")
+        db.commit()
+    db.close()
+except Exception as e:
+    print(f"Error updating admin: {e}")
+
 # Register routers
 app.include_router(auth.router)
 app.include_router(dashboard.router)

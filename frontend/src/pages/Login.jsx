@@ -65,12 +65,6 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="login-hint">
-          <p>Demo accounts:</p>
-          <p><strong>admin@hetalls.com</strong> / admin123 (Admin)</p>
-          <p><strong>sara@hetalls.com</strong> / pass123 (Accountant)</p>
-          <p><strong>mike@hetalls.com</strong> / pass123 (E-Commerce)</p>
-        </div>
       </div>
     </div>
   )
