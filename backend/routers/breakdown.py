@@ -8,12 +8,11 @@ from auth import get_current_user
 
 router = APIRouter(prefix="/api/breakdown", tags=["breakdown"])
 
-SHEET_URL_TEMPLATE = "https://docs.google.com/spreadsheets/d/1SVvZnv8yphJNJp_qNKZdkB-WByslByjeRPM0_0oLQuE/gviz/tq?tqx=out:csv&sheet={}"
+SHEET_URL = "https://docs.google.com/spreadsheets/d/1SVvZnv8yphJNJp_qNKZdkB-WByslByjeRPM0_0oLQuE/export?format=csv&gid=1569773873"
 
 def fetch_sheet_csv(sheet_name):
-    url = SHEET_URL_TEMPLATE.format(urllib.parse.quote(sheet_name))
     try:
-        req = urllib.request.Request(url)
+        req = urllib.request.Request(SHEET_URL)
         with urllib.request.urlopen(req) as response:
             content = response.read().decode('utf-8')
             return list(csv.reader(StringIO(content)))

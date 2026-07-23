@@ -97,7 +97,7 @@ export default function Dashboard() {
   const getGroupedData = () => {
     if (!bdData?.headers || !bdData?.sub_headers) return []
     const groups = []; let cur = null
-    for (let i = 0; i < bdData.sub_headers.length; i++) {
+    for (let i = 1; i < bdData.sub_headers.length; i++) {
       const h = bdData.headers[i] || '', s = bdData.sub_headers[i] || ''
       if (!cur || cur.header !== h) { cur = { header: h, columns: [] }; groups.push(cur) }
       cur.columns.push({ subHeader: s, colIndex: i })
