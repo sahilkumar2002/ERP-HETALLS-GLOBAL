@@ -558,6 +558,7 @@ tbody td:first-child { color: var(--text-primary); font-weight: 500; }
   z-index: 25;
   border-right: 2px solid var(--border);
   text-align: left;
+}
 .breakdown-table th.main-header {
   color: var(--text-primary);
   text-align: center;
