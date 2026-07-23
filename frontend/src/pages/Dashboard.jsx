@@ -67,6 +67,7 @@ export default function Dashboard() {
   const [showBreakdown, setShowBreakdown] = useState(false)
   const [bdTab,        setBdTab]        = useState('today')
   const [bdCustomDate, setBdCustomDate] = useState('')
+  const [bdCustomEndDate, setBdCustomEndDate] = useState('')
   const [bdData,       setBdData]       = useState(null)
   const [bdLoading,    setBdLoading]    = useState(false)
 
@@ -91,7 +92,12 @@ export default function Dashboard() {
   }
 
   const handleBdCustom = () => {
-    if (bdCustomDate) { setBdTab('custom'); fetchBreakdown(bdCustomDate) }
+    if (bdCustomDate) {
+      setBdTab('custom')
+      let url = bdCustomDate
+      if (bdCustomEndDate) url += `|${bdCustomEndDate}`
+      fetchBreakdown(url)
+    }
   }
 
   const getGroupedData = () => {
@@ -193,7 +199,7 @@ export default function Dashboard() {
                 <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                   {bdTab === 'today' && `Today — ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`}
                   {bdTab === 'all' && 'All Data'}
-                  {bdTab === 'custom' && `Custom — ${bdCustomDate}`}
+                  {bdTab === 'custom' && `Custom — ${bdCustomDate} ${bdCustomEndDate ? 'to ' + bdCustomEndDate : ''}`}
                 </p>
               </div>
               <button onClick={() => setShowBreakdown(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20} /></button>
@@ -203,7 +209,10 @@ export default function Dashboard() {
               <button className={`breakdown-tab ${bdTab === 'all' ? 'active' : ''}`} onClick={() => handleBdTab('all')}><List size={14} /> All</button>
               <div className="breakdown-tab-custom">
                 <Calendar size={14} style={{ color: 'var(--text-muted)' }} />
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>From:</span>
                 <input type="date" value={bdCustomDate} onChange={e => setBdCustomDate(e.target.value)} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '6px 10px', color: 'var(--text-primary)', fontSize: '12px' }} />
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>To:</span>
+                <input type="date" value={bdCustomEndDate} onChange={e => setBdCustomEndDate(e.target.value)} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '6px 10px', color: 'var(--text-primary)', fontSize: '12px' }} />
                 <button className={`breakdown-tab ${bdTab === 'custom' ? 'active' : ''}`} onClick={handleBdCustom}>Go</button>
               </div>
             </div>
@@ -220,7 +229,7 @@ export default function Dashboard() {
                   <table className="breakdown-table">
                     <thead>
                       <tr>
-                        <th rowSpan={2} style={{ verticalAlign: 'bottom' }}>Date</th>
+                        <th rowSpan={2} className="sticky-col" style={{ verticalAlign: 'bottom' }}>Date</th>
                         {getGroupedData().map((group, idx) => (
                           <th key={idx} colSpan={group.columns.length} className="main-header">
                             {group.header}

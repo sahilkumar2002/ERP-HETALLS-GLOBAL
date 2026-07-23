@@ -75,16 +75,18 @@ def daily_sales(date: str = Query(default="today"), current_user=Depends(get_cur
         # Column A (index 0) is the date column
         row_date = row[0].strip() if len(row) > 0 else ""
         
-        if not filter_all and target_date:
-            # Try to match date
+        if not filter_all:
             try:
-                row_dt = datetime.strptime(row_date, "%d-%b-%Y")
+                row_dt = datetime.strptime(row_date, "%d-%b-%Y").date()
                 if date == "today":
-                    if row_dt.date() != now.date():
+                    if row_dt != now.date():
                         continue
                 else:
-                    target_dt = datetime.strptime(date, "%Y-%m-%d")
-                    if row_dt.date() != target_dt.date():
+                    parts = date.split("|")
+                    start_dt = datetime.strptime(parts[0], "%Y-%m-%d").date()
+                    end_dt = datetime.strptime(parts[1], "%Y-%m-%d").date() if len(parts) > 1 else start_dt
+                    
+                    if row_dt < start_dt or row_dt > end_dt:
                         continue
             except ValueError:
                 continue

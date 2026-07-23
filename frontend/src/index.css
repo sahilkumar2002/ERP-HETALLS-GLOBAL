@@ -527,7 +527,7 @@ tbody td:first-child { color: var(--text-primary); font-weight: 500; }
   text-align: right;
   color: var(--text-primary);
 }
-.breakdown-table th:first-child, .breakdown-table td:first-child {
+.breakdown-table th.sticky-col, .breakdown-table td:first-child {
   text-align: left;
   position: sticky;
   left: 0;
