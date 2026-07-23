@@ -3,7 +3,7 @@ import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
 import {
   DollarSign, ShoppingCart, Package, AlertTriangle,
-  TrendingUp, Users, FileText, AlertCircle
+  TrendingUp, Users, FileText, AlertCircle, Layers, X, Calendar, Clock, List
 } from 'lucide-react'
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -63,6 +63,46 @@ export default function Dashboard() {
   const [loading,      setLoading]      = useState(true)
   const [showRevDrop,  setShowRevDrop]  = useState(false)
   const [cubeSide,     setCubeSide]     = useState(0)
+  const [showBreakdown, setShowBreakdown] = useState(false)
+  const [bdTab,        setBdTab]        = useState('today')
+  const [bdCustomDate, setBdCustomDate] = useState('')
+  const [bdData,       setBdData]       = useState(null)
+  const [bdLoading,    setBdLoading]    = useState(false)
+
+  const fetchBreakdown = (dateParam) => {
+    setBdLoading(true)
+    axios.get(`${API}/api/breakdown/daily-sales?date=${dateParam}`)
+      .then(res => setBdData(res.data))
+      .catch(console.error)
+      .finally(() => setBdLoading(false))
+  }
+
+  const openBreakdown = () => {
+    setShowBreakdown(true)
+    setBdTab('today')
+    fetchBreakdown('today')
+  }
+
+  const handleBdTab = (tab) => {
+    setBdTab(tab)
+    if (tab === 'today') fetchBreakdown('today')
+    else if (tab === 'all') fetchBreakdown('all')
+  }
+
+  const handleBdCustom = () => {
+    if (bdCustomDate) { setBdTab('custom'); fetchBreakdown(bdCustomDate) }
+  }
+
+  const getGroupedData = () => {
+    if (!bdData?.headers || !bdData?.sub_headers) return []
+    const groups = []; let cur = null
+    for (let i = 0; i < bdData.sub_headers.length; i++) {
+      const h = bdData.headers[i] || '', s = bdData.sub_headers[i] || ''
+      if (!cur || cur.header !== h) { cur = { header: h, columns: [] }; groups.push(cur) }
+      cur.columns.push({ subHeader: s, colIndex: i })
+    }
+    return groups
+  }
 
   useEffect(() => {
     Promise.all([
@@ -135,7 +175,79 @@ export default function Dashboard() {
 
         {/* Active Employees */}
         <KPICard icon={Users} label="Active Employees" value={kpis?.total_employees || 42} sub="Across all departments" colorClass="green" />
+
+        {/* Detailed Breakdown */}
+        <div onClick={openBreakdown} style={{ cursor: 'pointer' }}>
+          <KPICard icon={Layers} label="Detailed Breakdown" value="Click" sub="Daily Sale Brands & Portal" colorClass="blue" format="text" />
+        </div>
       </div>
+
+      {/* Breakdown Modal */}
+      {showBreakdown && (
+        <div className="breakdown-overlay" onClick={() => setShowBreakdown(false)}>
+          <div className="breakdown-modal" onClick={e => e.stopPropagation()}>
+            <div className="breakdown-modal-header">
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: 700 }}>Daily Sale Brands & Portal</h3>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                  {bdTab === 'today' && `Today — ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`}
+                  {bdTab === 'all' && 'All Data'}
+                  {bdTab === 'custom' && `Custom — ${bdCustomDate}`}
+                </p>
+              </div>
+              <button onClick={() => setShowBreakdown(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+            <div className="breakdown-tabs">
+              <button className={`breakdown-tab ${bdTab === 'today' ? 'active' : ''}`} onClick={() => handleBdTab('today')}><Clock size={14} /> Today</button>
+              <button className={`breakdown-tab ${bdTab === 'all' ? 'active' : ''}`} onClick={() => handleBdTab('all')}><List size={14} /> All</button>
+              <div className="breakdown-tab-custom">
+                <Calendar size={14} style={{ color: 'var(--text-muted)' }} />
+                <input type="date" value={bdCustomDate} onChange={e => setBdCustomDate(e.target.value)} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '6px 10px', color: 'var(--text-primary)', fontSize: '12px' }} />
+                <button className={`breakdown-tab ${bdTab === 'custom' ? 'active' : ''}`} onClick={handleBdCustom}>Go</button>
+              </div>
+            </div>
+            <div className="breakdown-content">
+              {bdLoading ? (
+                <div className="page-loading" style={{ height: '200px' }}><div className="big-spinner" /><p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Fetching data…</p></div>
+              ) : !bdData || bdData.total_rows === 0 ? (
+                <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
+                  <p style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>No data found</p>
+                  <p style={{ fontSize: '13px' }}>Try selecting a different date or view all data.</p>
+                </div>
+              ) : (
+                bdData.rows.map((row, rowIdx) => (
+                  <div key={rowIdx} className="breakdown-row-card">
+                    <div className="breakdown-row-date">{row[0] || `Row ${rowIdx + 1}`}</div>
+                    <div className="breakdown-groups">
+                      {getGroupedData().map((group, gIdx) => {
+                        const hasValues = group.columns.some(c => row[c.colIndex] && row[c.colIndex].trim())
+                        if (!hasValues && gIdx > 0) return null
+                        return (
+                          <div key={gIdx} className="breakdown-group">
+                            <div className="breakdown-group-header">{group.header}</div>
+                            <div className="breakdown-group-items">
+                              {group.columns.map((col, cIdx) => {
+                                const val = row[col.colIndex] || ''
+                                if (!val.trim() && gIdx > 0) return null
+                                return (
+                                  <div key={cIdx} className="breakdown-item">
+                                    <span className="breakdown-item-label">{col.subHeader}</span>
+                                    <span className="breakdown-item-value">{val.trim() || '—'}</span>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Charts */}
       <div className="chart-grid" style={{ gridTemplateColumns: '1fr' }}>
