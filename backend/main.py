@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import create_tables
-from routers import auth, dashboard, users, orders, inventory, accounts, hr, reports, payroll
+from routers import auth, dashboard, users, orders, inventory, accounts, hr, reports, payroll, breakdown
 
 app = FastAPI(title="Rugs ERP API", version="1.0.0")
 
@@ -39,6 +39,7 @@ app.include_router(accounts.router)
 app.include_router(hr.router)
 app.include_router(reports.router)
 app.include_router(payroll.router)
+app.include_router(breakdown.router)
 
 @app.get("/")
 def root():

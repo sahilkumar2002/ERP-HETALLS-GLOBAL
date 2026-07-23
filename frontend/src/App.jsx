@@ -10,6 +10,7 @@ import Accounts  from './pages/Accounts'
 import HR        from './pages/HR'
 import Reports   from './pages/Reports'
 import Settings  from './pages/Settings'
+import DetailedBreakdown from './pages/DetailedBreakdown'
 import SalaryCalculator from './pages/SalaryCalculator'
 import Placeholder from './components/Placeholder'
 import './index.css'
@@ -40,6 +41,7 @@ function AppLayout() {
             <Route path="/hr/salary-calculator"   element={<SalaryCalculator />} />
             <Route path="/reports"               element={<Reports />} />
             <Route path="/settings"  element={<Settings />} />
+            <Route path="/breakdown" element={<DetailedBreakdown />} />
             <Route path="*"          element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </div>

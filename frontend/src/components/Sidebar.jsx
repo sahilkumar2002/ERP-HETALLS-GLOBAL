@@ -15,6 +15,7 @@ const NAV = [
   ]},
   { label: 'Intelligence', items: [
     { to: '/reports',    icon: BarChart2,       label: 'Reports',     permission: 'reports' },
+    { to: '/breakdown',  icon: Layers,          label: 'Detailed Breakdown', permission: 'reports' },
   ]},
   { label: 'System', items: [
     { to: '/settings',   icon: Settings,        label: 'Settings',    role: 'admin' },
