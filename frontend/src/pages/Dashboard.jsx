@@ -219,7 +219,7 @@ export default function Dashboard() {
 
         {/* Detailed Breakdown */}
         <div onClick={openBreakdown} style={{ cursor: 'pointer' }}>
-          <KPICard icon={Layers} label="Detailed Breakdown" value="Click" sub="Daily Sale Brands & Portal" colorClass="blue" format="text" />
+          <KPICard icon={Layers} label="Detailed Breakdown" value="Breakdown" sub="Daily Sale Brands & Portal" colorClass="blue" format="text" />
         </div>
       </div>
 
