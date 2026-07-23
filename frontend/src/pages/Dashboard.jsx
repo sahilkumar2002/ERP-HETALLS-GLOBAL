@@ -216,34 +216,39 @@ export default function Dashboard() {
                   <p style={{ fontSize: '13px' }}>Try selecting a different date or view all data.</p>
                 </div>
               ) : (
-                bdData.rows.map((row, rowIdx) => (
-                  <div key={rowIdx} className="breakdown-row-card">
-                    <div className="breakdown-row-date">{row[0] || `Row ${rowIdx + 1}`}</div>
-                    <div className="breakdown-groups">
-                      {getGroupedData().map((group, gIdx) => {
-                        const hasValues = group.columns.some(c => row[c.colIndex] && row[c.colIndex].trim())
-                        if (!hasValues && gIdx > 0) return null
-                        return (
-                          <div key={gIdx} className="breakdown-group">
-                            <div className="breakdown-group-header">{group.header}</div>
-                            <div className="breakdown-group-items">
-                              {group.columns.map((col, cIdx) => {
-                                const val = row[col.colIndex] || ''
-                                if (!val.trim() && gIdx > 0) return null
-                                return (
-                                  <div key={cIdx} className="breakdown-item">
-                                    <span className="breakdown-item-label">{col.subHeader}</span>
-                                    <span className="breakdown-item-value">{val.trim() || '—'}</span>
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ))
+                <div className="breakdown-table-wrapper">
+                  <table className="breakdown-table">
+                    <thead>
+                      <tr>
+                        <th rowSpan={2} style={{ verticalAlign: 'bottom' }}>Date</th>
+                        {getGroupedData().map((group, idx) => (
+                          <th key={idx} colSpan={group.columns.length} className="main-header">
+                            {group.header}
+                          </th>
+                        ))}
+                      </tr>
+                      <tr>
+                        {getGroupedData().flatMap(group => 
+                          group.columns.map(col => (
+                            <th key={col.colIndex}>{col.subHeader}</th>
+                          ))
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bdData.rows.map((row, rIdx) => (
+                        <tr key={rIdx}>
+                          <td>{row[0] || `Row ${rIdx + 1}`}</td>
+                          {getGroupedData().flatMap(group => 
+                            group.columns.map(col => (
+                              <td key={col.colIndex}>{row[col.colIndex] || '-'}</td>
+                            ))
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           </div>

@@ -445,8 +445,8 @@ tbody td:first-child { color: var(--text-primary); font-weight: 500; }
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: 16px;
-  width: 90vw;
-  max-width: 900px;
+  width: 96vw;
+  max-width: 1600px;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
@@ -507,60 +507,46 @@ tbody td:first-child { color: var(--text-primary); font-weight: 500; }
   flex: 1;
 }
 
-.breakdown-row-card {
-  background: var(--bg-card);
+/* New table styles */
+.breakdown-table-wrapper {
+  overflow-x: auto;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 16px;
-  overflow: hidden;
+  border-radius: 8px;
+  background: var(--bg-card);
 }
-.breakdown-row-date {
-  padding: 12px 20px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--gold);
-  background: rgba(245,158,11,0.08);
+.breakdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap;
+}
+.breakdown-table th, .breakdown-table td {
+  padding: 10px 14px;
   border-bottom: 1px solid var(--border);
-}
-
-.breakdown-groups {
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.breakdown-group {
-  border-left: 3px solid var(--gold);
-  padding-left: 14px;
-}
-.breakdown-group-header {
+  border-right: 1px solid var(--border);
   font-size: 13px;
-  font-weight: 700;
+  text-align: right;
   color: var(--text-primary);
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
-.breakdown-group-items {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 6px;
-}
-.breakdown-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 10px;
-  border-radius: 6px;
+.breakdown-table th:first-child, .breakdown-table td:first-child {
+  text-align: left;
+  position: sticky;
+  left: 0;
   background: var(--bg-surface);
-}
-.breakdown-item-label {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-.breakdown-item-value {
-  font-size: 13px;
+  z-index: 10;
+  border-right: 2px solid var(--border);
   font-weight: 700;
+}
+.breakdown-table th {
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.breakdown-table th.main-header {
   color: var(--text-primary);
+  text-align: center;
+  background: rgba(245,158,11,0.08);
+  font-weight: 700;
+}
+.breakdown-table tbody tr:hover td {
+  background: rgba(245,158,11,0.04);
 }
