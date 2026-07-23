@@ -214,23 +214,21 @@ input, select, textarea { font-family: inherit; outline: none; }
 .kpi-trend.up   { color: var(--success); }
 .kpi-trend.down { color: var(--danger); }
 
-/* ─── 3D Flip Cube ──────────────────────────────────────────────────── */
+/* ─── 3D 5-Sided Prism ──────────────────────────────────────────────────── */
 .cube-container {
   perspective: 1000px;
   position: relative;
   width: 100%;
   height: 100%;
-  min-height: 120px; /* match KPI card approx height */
+  min-height: 120px;
 }
 .cube {
   width: 100%;
   height: 100%;
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
-}
-.cube.flipped {
-  transform: rotateY(180deg);
+  transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
+  /* The rotation will be applied inline in React: transform: translateZ(-83px) rotateX(...) */
 }
 .cube-face {
   position: absolute;
@@ -240,12 +238,11 @@ input, select, textarea { font-family: inherit; outline: none; }
   -webkit-backface-visibility: hidden;
   display: flex;
 }
-.cube-front {
-  transform: rotateY(0deg);
-}
-.cube-back {
-  transform: rotateY(180deg);
-}
+.cube-face:nth-child(1) { transform: rotateX(0deg) translateZ(83px); }
+.cube-face:nth-child(2) { transform: rotateX(-72deg) translateZ(83px); }
+.cube-face:nth-child(3) { transform: rotateX(-144deg) translateZ(83px); }
+.cube-face:nth-child(4) { transform: rotateX(-216deg) translateZ(83px); }
+.cube-face:nth-child(5) { transform: rotateX(-288deg) translateZ(83px); }
 
 /* ─── Cards / Panels ────────────────────────────────────────────────── */
 .card {

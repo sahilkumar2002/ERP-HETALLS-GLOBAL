@@ -62,7 +62,7 @@ export default function Dashboard() {
   const [companiesRev, setCompaniesRev] = useState([])
   const [loading,      setLoading]      = useState(true)
   const [showRevDrop,  setShowRevDrop]  = useState(false)
-  const [isCubeFlipped, setIsCubeFlipped] = useState(false)
+  const [cubeSide,     setCubeSide]     = useState(0)
 
   useEffect(() => {
     Promise.all([
@@ -111,18 +111,23 @@ export default function Dashboard() {
           )}
         </div>
         
-        {/* The 3D Flip Cube */}
-        <div className="cube-container" onClick={() => setIsCubeFlipped(!isCubeFlipped)} style={{ cursor: 'pointer' }}>
-          <div className={`cube ${isCubeFlipped ? 'flipped' : ''}`}>
-            <div className="cube-face cube-front">
-              <KPICard icon={Package} label="Orders Overview" value="Click to Flip" sub="View detailed stats" colorClass="blue" format="text" />
+        {/* The 5-Sided 3D Prism */}
+        <div className="cube-container" onClick={() => setCubeSide(s => s + 1)} style={{ cursor: 'pointer' }}>
+          <div className="cube" style={{ transform: `translateZ(-83px) rotateX(${cubeSide * 72}deg)` }}>
+            <div className="cube-face">
+              <div style={{ width: '100%', height: '100%' }}><KPICard icon={Package} label="Orders Overview" value="Click to Spin" sub="View detailed stats" colorClass="blue" format="text" /></div>
             </div>
-            <div className="cube-face cube-back" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 500 }}>Orders Statistics</div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span>Total Orders:</span> <span style={{ fontWeight: 700, color: 'var(--info)' }}>{kpis?.total_orders}</span></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span>This Year:</span> <span style={{ fontWeight: 700, color: 'var(--success)' }}>{kpis?.this_year_orders}</span></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span>This Month:</span> <span style={{ fontWeight: 700, color: 'var(--warning)' }}>{kpis?.this_month_orders}</span></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span>Today:</span> <span style={{ fontWeight: 700, color: 'var(--danger)' }}>{kpis?.today_orders}</span></div>
+            <div className="cube-face">
+              <div style={{ width: '100%', height: '100%' }}><KPICard icon={ShoppingCart} label="Total Orders" value={kpis?.total_orders} sub="All time" colorClass="info" /></div>
+            </div>
+            <div className="cube-face">
+              <div style={{ width: '100%', height: '100%' }}><KPICard icon={TrendingUp} label="Orders This Year" value={kpis?.this_year_orders} sub="Year to date" colorClass="success" /></div>
+            </div>
+            <div className="cube-face">
+              <div style={{ width: '100%', height: '100%' }}><KPICard icon={TrendingUp} label="Orders This Month" value={kpis?.this_month_orders} sub="Month to date" colorClass="warning" /></div>
+            </div>
+            <div className="cube-face">
+              <div style={{ width: '100%', height: '100%' }}><KPICard icon={AlertCircle} label="Orders Today" value={kpis?.today_orders} sub="Today's orders" colorClass="danger" /></div>
             </div>
           </div>
         </div>
