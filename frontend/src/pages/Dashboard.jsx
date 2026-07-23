@@ -147,43 +147,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Recent Orders */}
-      <div className="card">
-        <div className="card-header">
-          <div>
-            <div className="card-title">Recent Orders</div>
-            <div className="card-subtitle">Latest 8 orders across all platforms</div>
-          </div>
-        </div>
-        <div className="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Platform</th>
-                <th>Customer</th>
-                <th>Product</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentOrders.map(o => (
-                <tr key={o.id}>
-                  <td style={{ color: 'var(--gold)', fontFamily: 'monospace', fontSize: 12 }}>{o.order_id}</td>
-                  <td><PlatformPill platform={o.platform} /></td>
-                  <td>{o.customer_name}</td>
-                  <td style={{ color: 'var(--text-secondary)', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.product_name}</td>
-                  <td style={{ color: 'var(--success)', fontWeight: 600 }}>${o.amount?.toLocaleString()}</td>
-                  <td><StatusBadge status={o.status} /></td>
-                  <td style={{ fontSize: 12 }}>{o.order_date ? new Date(o.order_date).toLocaleDateString() : '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+
     </div>
   )
 }
