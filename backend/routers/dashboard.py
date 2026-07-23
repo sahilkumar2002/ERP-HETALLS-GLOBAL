@@ -1,96 +1,178 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from sqlalchemy import func, extract
-from database import get_db, Order, Product, Invoice, Employee
+import urllib.request
+import urllib.parse
+import csv
+from io import StringIO
+from datetime import datetime
 from auth import get_current_user
-from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
+SHEET_URL_TEMPLATE = "https://docs.google.com/spreadsheets/d/1SVvZnv8yphJNJp_qNKZdkB-WByslByjeRPM0_0oLQuE/gviz/tq?tqx=out:csv&sheet={}"
+
+def fetch_sheet_csv(sheet_name):
+    url = SHEET_URL_TEMPLATE.format(urllib.parse.quote(sheet_name))
+    try:
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req) as response:
+            content = response.read().decode('utf-8')
+            return list(csv.reader(StringIO(content)))
+    except Exception as e:
+        print(f"Error fetching sheet {sheet_name}: {e}")
+        return []
+
 @router.get("/kpis")
-def get_kpis(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    now   = datetime.utcnow()
-    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+def get_kpis(current_user=Depends(get_current_user)):
+    # Fetch MONTHLY BRANDS
+    brands_data = fetch_sheet_csv("MONTHLY BRANDS")
+    total_revenue = 0.0
+    for row in brands_data[1:]:  # Skip header
+        if len(row) > 1 and row[1]:
+            try:
+                # Remove commas and $ if any
+                val_str = row[1].replace(',', '').replace('$', '').strip()
+                if val_str.lower() != 'total':
+                    total_revenue += float(val_str)
+            except ValueError:
+                pass
 
-    total_revenue = db.query(func.sum(Order.amount)).filter(
-        Order.status != "returned"
-    ).scalar() or 0
-
-    monthly_revenue = db.query(func.sum(Order.amount)).filter(
-        Order.order_date >= month_start,
-        Order.status != "returned"
-    ).scalar() or 0
-
-    total_orders   = db.query(func.count(Order.id)).scalar() or 0
-    pending_orders = db.query(func.count(Order.id)).filter(Order.status == "pending").scalar() or 0
-    low_stock      = db.query(func.count(Product.id)).filter(
-        Product.stock_qty <= Product.reorder_level, Product.is_active == True
-    ).scalar() or 0
-    pending_invoices = db.query(func.sum(Invoice.total)).filter(Invoice.status == "pending").scalar() or 0
-    overdue_invoices = db.query(func.count(Invoice.id)).filter(Invoice.status == "overdue").scalar() or 0
-    total_employees  = db.query(func.count(Employee.id)).filter(Employee.is_active == True).scalar() or 0
+    # Fetch NEW sheet (orders)
+    orders_data = fetch_sheet_csv("NEW")
+    now = datetime.utcnow()
+    current_year = now.year
+    current_month = now.month
+    
+    # Let's normalize current date to compare "Today"
+    today_str = now.strftime("%d-%b-%Y") # e.g. "23-Jul-2026"
+    
+    total_orders = 0
+    this_year = 0
+    this_month = 0
+    today = 0
+    
+    for row in orders_data:
+        # Based on test output, Date is at index 2 or index 3. Let's look for a valid date in row[2]
+        if len(row) > 2 and row[2]:
+            date_str = row[2].strip()
+            if not date_str or date_str.lower() == 'date':
+                continue
+            
+            total_orders += 1
+            
+            try:
+                # e.g., "1-Nov-2025" or "23-Jul-2026"
+                dt = datetime.strptime(date_str, "%d-%b-%Y")
+                if dt.year == current_year:
+                    this_year += 1
+                    if dt.month == current_month:
+                        this_month += 1
+            except ValueError:
+                pass
+            
+            # Text comparison for today might be safer if timezones or formatting differs slightly,
+            # but let's compare formatted strings. The CSV might have "23-Jul-2026" or "23-Jul-26".
+            # We will use the parsed dt if successful.
+            try:
+                dt = datetime.strptime(date_str, "%d-%b-%Y")
+                if dt.date() == now.date():
+                    today += 1
+            except ValueError:
+                pass
 
     return {
         "total_revenue":     round(total_revenue, 2),
-        "monthly_revenue":   round(monthly_revenue, 2),
         "total_orders":      total_orders,
-        "pending_orders":    pending_orders,
-        "low_stock_alerts":  low_stock,
-        "pending_invoices":  round(pending_invoices, 2),
-        "overdue_invoices":  overdue_invoices,
-        "total_employees":   total_employees,
+        "this_year_orders":  this_year,
+        "this_month_orders": this_month,
+        "today_orders":      today,
     }
 
-@router.get("/revenue-chart")
-def revenue_chart(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    """Last 6 months revenue split by platform."""
+@router.get("/companies-revenue")
+def companies_revenue(current_user=Depends(get_current_user)):
+    # Returns the total revenue per company based on MONTHLY BRANDS columns C to J
+    # C: ETSY-CASAVANI, D: AMAZON, E: ETSY-RUGSFOREVER, F: WALMART, G: PEPPERFRY
+    # H: CASAVANI WEBSITE, I: EBAY-RUGSFOREVER, J: JAYPOR
+    brands_data = fetch_sheet_csv("MONTHLY BRANDS")
+    
+    companies = [
+        {"name": "ETSY-CASAVANI", "col_index": 2, "color": "#f87171"},
+        {"name": "AMAZON", "col_index": 3, "color": "#f59e0b"},
+        {"name": "ETSY-RUGSFOREVER", "col_index": 4, "color": "#fb923c"},
+        {"name": "WALMART", "col_index": 5, "color": "#3b82f6"},
+        {"name": "PEPPERFRY", "col_index": 6, "color": "#ef4444"},
+        {"name": "CASAVANI WEBSITE", "col_index": 7, "color": "#10b981"},
+        {"name": "EBAY-RUGSFOREVER", "col_index": 8, "color": "#8b5cf6"},
+        {"name": "JAYPOR", "col_index": 9, "color": "#ec4899"},
+    ]
+    
     results = []
-    now = datetime.utcnow()
-    for i in range(5, -1, -1):
-        month_date  = now - timedelta(days=i * 30)
-        month_label = month_date.strftime("%b %Y")
-        y, m        = month_date.year, month_date.month
+    
+    for comp in companies:
+        total = 0.0
+        idx = comp["col_index"]
+        for row in brands_data[1:]:
+            if len(row) > idx and row[idx]:
+                try:
+                    val_str = row[idx].replace(',', '').replace('$', '').strip()
+                    if val_str.lower() != 'total':
+                        total += float(val_str)
+                except ValueError:
+                    pass
+        if total > 0:
+            results.append({"name": comp["name"], "value": round(total, 2), "color": comp["color"]})
+            
+    return results
 
-        amazon = db.query(func.sum(Order.amount)).filter(
-            Order.platform == "amazon",
-            extract("year",  Order.order_date) == y,
-            extract("month", Order.order_date) == m,
-            Order.status != "returned"
-        ).scalar() or 0
-
-        etsy = db.query(func.sum(Order.amount)).filter(
-            Order.platform == "etsy",
-            extract("year",  Order.order_date) == y,
-            extract("month", Order.order_date) == m,
-            Order.status != "returned"
-        ).scalar() or 0
-
-        results.append({"month": month_label, "amazon": round(amazon, 2), "etsy": round(etsy, 2)})
-
+@router.get("/revenue-chart")
+def revenue_chart(current_user=Depends(get_current_user)):
+    """Monthly revenue for all companies from MONTHLY BRANDS."""
+    brands_data = fetch_sheet_csv("MONTHLY BRANDS")
+    results = []
+    
+    for row in brands_data[1:]:
+        if len(row) > 9 and row[0]:
+            month = row[0].strip()
+            if not month or month.lower() == 'total':
+                continue
+            
+            def parse_val(v):
+                try:
+                    return float(v.replace(',', '').replace('$', '').strip()) if v else 0.0
+                except ValueError:
+                    return 0.0
+                
+            results.append({
+                "month": month,
+                "ETSY-CASAVANI": parse_val(row[2]),
+                "AMAZON": parse_val(row[3]),
+                "ETSY-RUGSFOREVER": parse_val(row[4]),
+                "WALMART": parse_val(row[5]),
+                "PEPPERFRY": parse_val(row[6]),
+                "CASAVANI WEBSITE": parse_val(row[7]),
+                "EBAY-RUGSFOREVER": parse_val(row[8]),
+                "JAYPOR": parse_val(row[9]),
+            })
+            
     return results
 
 @router.get("/recent-orders")
-def recent_orders(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    orders = db.query(Order).order_by(Order.created_at.desc()).limit(8).all()
-    return [
-        {
-            "id":            o.id,
-            "order_id":      o.order_id,
-            "platform":      o.platform,
-            "customer_name": o.customer_name,
-            "product_name":  o.product_name,
-            "amount":        o.amount,
-            "status":        o.status,
-            "order_date":    o.order_date.isoformat() if o.order_date else None,
-        }
-        for o in orders
-    ]
+def recent_orders(current_user=Depends(get_current_user)):
+    # To keep the UI working, we can parse the last 8 rows of NEW sheet or just return empty for now
+    orders_data = fetch_sheet_csv("NEW")
+    results = []
+    # Assuming NEW has no header, or header is first row.
+    # We will get the last 8 valid rows
+    valid_rows = [r for r in orders_data if len(r) > 3 and r[2]]
+    for i, row in enumerate(reversed(valid_rows[-8:])):
+        results.append({
+            "id": i,
+            "order_id": f"EXT-{1000+i}",
+            "platform": row[0] if len(row) > 0 else "Unknown",
+            "customer_name": "N/A", # Customer name might not be clearly defined
+            "product_name": row[1] if len(row) > 1 else "Unknown",
+            "amount": float(row[3].replace(',', '').replace('$', '').strip()) if len(row) > 3 and row[3] else 0.0,
+            "status": "completed",
+            "order_date": row[2] if len(row) > 2 else ""
+        })
+    return results
 
-@router.get("/platform-split")
-def platform_split(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    amazon = db.query(func.sum(Order.amount)).filter(Order.platform == "amazon", Order.status != "returned").scalar() or 0
-    etsy   = db.query(func.sum(Order.amount)).filter(Order.platform == "etsy",   Order.status != "returned").scalar() or 0
-    return [
-        {"name": "Amazon FBA", "value": round(amazon, 2), "color": "#f59e0b"},
-        {"name": "Etsy",       "value": round(etsy,   2), "color": "#d97706"},
-    ]

@@ -16,7 +16,7 @@ def seed():
 
     # ── Users ─────────────────────────────────────────────────────────────────
     users = [
-        {"name": "Admin User",      "email": "admin@rugsco.com",      "password": "admin123",  "role": "admin",       "department": "IT"},
+        {"name": "Admin User",      "email": "it@hetalls.com",      "password": "admin123",  "role": "admin",       "department": "IT"},
         {"name": "Sara Accounts",   "email": "sara@rugsco.com",       "password": "pass123",   "role": "accountant",  "department": "Accounts"},
         {"name": "Mike Ecommerce",  "email": "mike@rugsco.com",       "password": "pass123",   "role": "ecommerce",   "department": "E-Commerce"},
         {"name": "Jane Warehouse",  "email": "jane@rugsco.com",       "password": "pass123",   "role": "warehouse",   "department": "Inventory"},
