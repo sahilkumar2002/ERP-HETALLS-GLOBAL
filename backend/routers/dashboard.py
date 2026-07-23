@@ -42,6 +42,13 @@ def get_kpis(current_user=Depends(get_current_user)):
     current_year = now.year
     current_month = now.month
     
+    if current_month >= 4:
+        fy_start = datetime(current_year, 4, 1)
+        fy_end = datetime(current_year + 1, 3, 31)
+    else:
+        fy_start = datetime(current_year - 1, 4, 1)
+        fy_end = datetime(current_year, 3, 31)
+    
     # Let's normalize current date to compare "Today"
     today_str = now.strftime("%d-%b-%Y") # e.g. "23-Jul-2026"
     
@@ -66,10 +73,14 @@ def get_kpis(current_user=Depends(get_current_user)):
             try:
                 # e.g., "1-Nov-2025" or "23-Jul-2026"
                 dt = datetime.strptime(date_str, "%d-%b-%Y")
-                if dt.year == current_year:
+                
+                # Check financial year
+                if fy_start <= dt <= fy_end:
                     this_year += 1
-                    if dt.month == current_month:
-                        this_month += 1
+                
+                # Check current calendar month
+                if dt.year == current_year and dt.month == current_month:
+                    this_month += 1
             except ValueError:
                 pass
             
