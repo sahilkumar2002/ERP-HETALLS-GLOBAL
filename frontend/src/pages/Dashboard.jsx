@@ -108,8 +108,7 @@ export default function Dashboard() {
 
   const handleBdTab = (tab) => {
     setBdTab(tab)
-    if (tab === 'today') fetchBreakdown('today')
-    else if (tab === 'all') fetchBreakdown('all')
+    fetchBreakdown(tab)
   }
 
   const handleBdCustom = () => {
