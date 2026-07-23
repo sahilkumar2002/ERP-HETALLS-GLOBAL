@@ -8,11 +8,13 @@ from auth import get_current_user
 
 router = APIRouter(prefix="/api/breakdown", tags=["breakdown"])
 
+import time
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1SVvZnv8yphJNJp_qNKZdkB-WByslByjeRPM0_0oLQuE/export?format=csv&gid=1569773873"
 
 def fetch_sheet_csv(sheet_name):
     try:
-        req = urllib.request.Request(SHEET_URL)
+        url_with_cb = f"{SHEET_URL}&cb={int(time.time())}"
+        req = urllib.request.Request(url_with_cb)
         with urllib.request.urlopen(req) as response:
             content = response.read().decode('utf-8')
             return list(csv.reader(StringIO(content)))
@@ -74,12 +76,18 @@ def daily_sales(date: str = Query(default="today"), current_user=Depends(get_cur
         
         # Column A (index 0) is the date column
         row_date = row[0].strip() if len(row) > 0 else ""
-        
+        if not row_date:
+            continue
+            
         if not filter_all:
             try:
                 row_dt = datetime.strptime(row_date, "%d-%b-%Y").date()
                 if date == "today":
                     if row_dt != now.date():
+                        continue
+                elif date.startswith("month|"):
+                    parts = date.split("|")[1].split("-")
+                    if row_dt.year != int(parts[0]) or row_dt.month != int(parts[1]):
                         continue
                 else:
                     parts = date.split("|")
@@ -92,6 +100,15 @@ def daily_sales(date: str = Query(default="today"), current_user=Depends(get_cur
                 continue
         
         rows.append(row)
+        
+    # Sort ascending by date
+    def get_date(r):
+        try:
+            return datetime.strptime(r[0].strip(), "%d-%b-%Y").date()
+        except:
+            return datetime.min.date()
+            
+    rows.sort(key=get_date)
     
     return {
         "headers": headers,

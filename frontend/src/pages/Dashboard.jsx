@@ -65,11 +65,28 @@ export default function Dashboard() {
   const [showRevDrop,  setShowRevDrop]  = useState(false)
   const [cubeSide,     setCubeSide]     = useState(0)
   const [showBreakdown, setShowBreakdown] = useState(false)
-  const [bdTab,        setBdTab]        = useState('today')
+  const [bdTab,        setBdTab]        = useState('all')
   const [bdCustomDate, setBdCustomDate] = useState('')
   const [bdCustomEndDate, setBdCustomEndDate] = useState('')
   const [bdData,       setBdData]       = useState(null)
   const [bdLoading,    setBdLoading]    = useState(false)
+
+  useEffect(() => {
+    let interval;
+    if (showBreakdown) {
+      interval = setInterval(() => {
+        let url = bdTab;
+        if (bdTab === 'custom') {
+          url = bdCustomDate;
+          if (bdCustomEndDate) url += `|${bdCustomEndDate}`;
+        }
+        axios.get(`${API}/api/breakdown/daily-sales?date=${url}&_=${Date.now()}`)
+          .then(res => setBdData(res.data))
+          .catch(console.error);
+      }, 15000); // Poll every 15 seconds
+    }
+    return () => clearInterval(interval);
+  }, [showBreakdown, bdTab, bdCustomDate, bdCustomEndDate, API])
 
   const fetchBreakdown = (dateParam) => {
     setBdLoading(true)
@@ -81,8 +98,8 @@ export default function Dashboard() {
 
   const openBreakdown = () => {
     setShowBreakdown(true)
-    setBdTab('today')
-    fetchBreakdown('today')
+    setBdTab('all')
+    fetchBreakdown('all')
   }
 
   const handleBdTab = (tab) => {
@@ -99,6 +116,20 @@ export default function Dashboard() {
       fetchBreakdown(url)
     }
   }
+
+  const getLast3Months = () => {
+    const months = [];
+    for (let i = 2; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      months.push({
+        label: d.toLocaleString('en-US', { month: 'short' }) + ' ' + d.getFullYear(),
+        value: `month|${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      });
+    }
+    return months;
+  }
+  const last3Months = getLast3Months();
 
   const getGroupedData = () => {
     if (!bdData?.headers || !bdData?.sub_headers) return []
@@ -199,14 +230,20 @@ export default function Dashboard() {
                 <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                   {bdTab === 'today' && `Today — ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`}
                   {bdTab === 'all' && 'All Data'}
+                  {bdTab.startsWith('month|') && `Month — ${bdTab.split('|')[1]}`}
                   {bdTab === 'custom' && `Custom — ${bdCustomDate} ${bdCustomEndDate ? 'to ' + bdCustomEndDate : ''}`}
                 </p>
               </div>
               <button onClick={() => setShowBreakdown(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20} /></button>
             </div>
             <div className="breakdown-tabs">
-              <button className={`breakdown-tab ${bdTab === 'today' ? 'active' : ''}`} onClick={() => handleBdTab('today')}><Clock size={14} /> Today</button>
               <button className={`breakdown-tab ${bdTab === 'all' ? 'active' : ''}`} onClick={() => handleBdTab('all')}><List size={14} /> All</button>
+              <button className={`breakdown-tab ${bdTab === 'today' ? 'active' : ''}`} onClick={() => handleBdTab('today')}><Clock size={14} /> Today</button>
+              {last3Months.map(m => (
+                <button key={m.value} className={`breakdown-tab ${bdTab === m.value ? 'active' : ''}`} onClick={() => handleBdTab(m.value)}>
+                  <Calendar size={14} /> {m.label}
+                </button>
+              ))}
               <div className="breakdown-tab-custom">
                 <Calendar size={14} style={{ color: 'var(--text-muted)' }} />
                 <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>From:</span>
