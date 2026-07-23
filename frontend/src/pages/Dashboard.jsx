@@ -134,6 +134,14 @@ export default function Dashboard() {
   }
   const last3Months = getLast3Months();
 
+  const calculateBdTotal = () => {
+    if (!bdData || !bdData.rows || bdData.rows.length === 0) return 0;
+    return bdData.rows.reduce((sum, row) => {
+      const val = String(row[1] || '').replace(/,/g, '').replace(/\$/g, '').trim();
+      return sum + (Number(val) || 0);
+    }, 0);
+  }
+
   const getGroupedData = () => {
     if (!bdData?.headers || !bdData?.sub_headers) return []
     const groups = []; let cur = null
@@ -236,7 +244,17 @@ export default function Dashboard() {
                   {bdTab === 'custom' && `Custom — ${bdCustomDate} ${bdCustomEndDate ? 'to ' + bdCustomEndDate : ''}`}
                 </p>
               </div>
-              <button onClick={() => setShowBreakdown(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20} /></button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                {!bdLoading && bdData && bdData.total_rows > 0 && (
+                  <div style={{ textAlign: 'right', background: 'rgba(245, 158, 11, 0.1)', padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Sales</div>
+                    <div style={{ fontSize: '16px', fontWeight: 700, color: '#f59e0b' }}>
+                      ${calculateBdTotal().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                  </div>
+                )}
+                <button onClick={() => setShowBreakdown(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20} /></button>
+              </div>
             </div>
             <div className="breakdown-tabs">
               <button className={`breakdown-tab ${bdTab === 'all' ? 'active' : ''}`} onClick={() => handleBdTab('all')}><List size={14} /> All</button>
