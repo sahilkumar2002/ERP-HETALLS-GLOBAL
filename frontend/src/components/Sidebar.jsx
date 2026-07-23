@@ -9,10 +9,6 @@ const NAV = [
   { label: 'Main', items: [
     { to: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard',   permission: 'dashboard' },
   ]},
-  { label: 'Operations', items: [
-    { to: '/ecommerce',  icon: ShoppingCart,    label: 'E-Commerce',  permission: 'ecommerce' },
-    { to: '/inventory',  icon: Package,         label: 'Inventory',   permission: 'inventory' },
-  ]},
   { label: 'Finance & People', items: [
     { to: '/accounts',   icon: DollarSign,      label: 'Accounts',    permission: 'accounts' },
     { to: '/hr',         icon: Users,           label: 'HR',          permission: 'hr' },
