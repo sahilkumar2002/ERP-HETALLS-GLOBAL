@@ -13,6 +13,7 @@ import {
 // ── Custom Tooltip ────────────────────────────────────────────────────
 const ChartTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
+  const total = payload.reduce((sum, p) => sum + (Number(p.value) || 0), 0)
   return (
     <div style={{
       background: 'var(--bg-card)', border: '1px solid var(--border)',
@@ -21,9 +22,12 @@ const ChartTooltip = ({ active, payload, label }) => {
       <p style={{ color: 'var(--text-muted)', marginBottom: 6 }}>{label}</p>
       {payload.map((p, i) => (
         <p key={i} style={{ color: p.color, fontWeight: 600 }}>
-          {p.name}: ${p.value?.toLocaleString()}
+          {p.name}: ${Number(p.value || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
         </p>
       ))}
+      <div style={{ marginTop: 6, paddingTop: 6, borderTop: '1px solid var(--border)', color: 'var(--text-primary)', fontWeight: 700 }}>
+        Total: ${total.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+      </div>
     </div>
   )
 }
