@@ -22,7 +22,7 @@ try:
     db = SessionLocal()
     admin = db.query(User).filter(User.role == "admin").first()
     if admin:
-        admin.email = "IT@heatlls.com"
+        admin.email = "IT@hetalls.com"
         admin.hashed_password = hash_password("HetallsF3&##$$$")
         db.commit()
     db.close()
