@@ -51,13 +51,17 @@ def get_kpis(current_user=Depends(get_current_user)):
     today = 0
     
     for row in orders_data:
-        # Based on test output, Date is at index 2 or index 3. Let's look for a valid date in row[2]
+        # Check if row has any non-empty data to count as an order
+        if not any(cell.strip() for cell in row):
+            continue
+            
+        total_orders += 1
+        
+        # Try to parse the date from column 2 (index 2)
         if len(row) > 2 and row[2]:
             date_str = row[2].strip()
             if not date_str or date_str.lower() == 'date':
                 continue
-            
-            total_orders += 1
             
             try:
                 # e.g., "1-Nov-2025" or "23-Jul-2026"
@@ -69,9 +73,6 @@ def get_kpis(current_user=Depends(get_current_user)):
             except ValueError:
                 pass
             
-            # Text comparison for today might be safer if timezones or formatting differs slightly,
-            # but let's compare formatted strings. The CSV might have "23-Jul-2026" or "23-Jul-26".
-            # We will use the parsed dt if successful.
             try:
                 dt = datetime.strptime(date_str, "%d-%b-%Y")
                 if dt.date() == now.date():

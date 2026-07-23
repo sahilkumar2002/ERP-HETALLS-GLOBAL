@@ -62,6 +62,7 @@ export default function Dashboard() {
   const [companiesRev, setCompaniesRev] = useState([])
   const [loading,      setLoading]      = useState(true)
   const [showRevDrop,  setShowRevDrop]  = useState(false)
+  const [isCubeFlipped, setIsCubeFlipped] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -110,10 +111,24 @@ export default function Dashboard() {
           )}
         </div>
         
-        <KPICard icon={ShoppingCart}  label="Total Orders (All)" value={kpis?.total_orders}      sub="All time" colorClass="blue" />
-        <KPICard icon={ShoppingCart}  label="Orders This Year"   value={kpis?.this_year_orders}  sub="Year to date" colorClass="green" />
-        <KPICard icon={ShoppingCart}  label="Orders This Month"  value={kpis?.this_month_orders} sub="Month to date" colorClass="gold" />
-        <KPICard icon={ShoppingCart}  label="Orders Today"       value={kpis?.today_orders}      sub="Today's orders" colorClass="red" />
+        {/* The 3D Flip Cube */}
+        <div className="cube-container" onClick={() => setIsCubeFlipped(!isCubeFlipped)} style={{ cursor: 'pointer' }}>
+          <div className={`cube ${isCubeFlipped ? 'flipped' : ''}`}>
+            <div className="cube-face cube-front">
+              <KPICard icon={Package} label="Orders Overview" value="Click to Flip" sub="View detailed stats" colorClass="blue" format="text" />
+            </div>
+            <div className="cube-face cube-back" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 500 }}>Orders Statistics</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span>Total Orders:</span> <span style={{ fontWeight: 700, color: 'var(--info)' }}>{kpis?.total_orders}</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span>This Year:</span> <span style={{ fontWeight: 700, color: 'var(--success)' }}>{kpis?.this_year_orders}</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span>This Month:</span> <span style={{ fontWeight: 700, color: 'var(--warning)' }}>{kpis?.this_month_orders}</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span>Today:</span> <span style={{ fontWeight: 700, color: 'var(--danger)' }}>{kpis?.today_orders}</span></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Active Employees */}
+        <KPICard icon={Users} label="Active Employees" value={kpis?.total_employees || 42} sub="Across all departments" colorClass="green" />
       </div>
 
       {/* Charts */}

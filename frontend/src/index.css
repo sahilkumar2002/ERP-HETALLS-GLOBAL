@@ -214,6 +214,39 @@ input, select, textarea { font-family: inherit; outline: none; }
 .kpi-trend.up   { color: var(--success); }
 .kpi-trend.down { color: var(--danger); }
 
+/* ─── 3D Flip Cube ──────────────────────────────────────────────────── */
+.cube-container {
+  perspective: 1000px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 120px; /* match KPI card approx height */
+}
+.cube {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+.cube.flipped {
+  transform: rotateY(180deg);
+}
+.cube-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+}
+.cube-front {
+  transform: rotateY(0deg);
+}
+.cube-back {
+  transform: rotateY(180deg);
+}
+
 /* ─── Cards / Panels ────────────────────────────────────────────────── */
 .card {
   background: var(--bg-card);
