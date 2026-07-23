@@ -111,23 +111,24 @@ export default function Dashboard() {
           )}
         </div>
         
-        {/* The 5-Sided 3D Prism */}
+        {/* The 4-Sided Horizontal 3D Prism */}
         <div className="cube-container" onClick={() => setCubeSide(s => s + 1)} style={{ cursor: 'pointer' }}>
-          <div className="cube" style={{ transform: `translateZ(-83px) rotateX(${cubeSide * 72}deg)` }}>
+          <div className="cube" style={{ transform: `translateZ(-140px) rotateY(${cubeSide * -90}deg)` }}>
+            {/* Face 1: Today */}
             <div className="cube-face">
-              <div style={{ width: '100%', height: '100%' }}><KPICard icon={Package} label="Orders Overview" value="Click to Spin" sub="View detailed stats" colorClass="blue" format="text" /></div>
+              <div style={{ width: '100%', height: '100%' }}><KPICard icon={AlertCircle} label="Orders Today" value={kpis?.today_orders} sub="Click to spin" colorClass="danger" /></div>
             </div>
+            {/* Face 2: Total */}
             <div className="cube-face">
               <div style={{ width: '100%', height: '100%' }}><KPICard icon={ShoppingCart} label="Total Orders" value={kpis?.total_orders} sub="All time" colorClass="info" /></div>
             </div>
+            {/* Face 3: This Year */}
             <div className="cube-face">
               <div style={{ width: '100%', height: '100%' }}><KPICard icon={TrendingUp} label="Orders This Year" value={kpis?.this_year_orders} sub="Year to date" colorClass="success" /></div>
             </div>
+            {/* Face 4: This Month */}
             <div className="cube-face">
               <div style={{ width: '100%', height: '100%' }}><KPICard icon={TrendingUp} label="Orders This Month" value={kpis?.this_month_orders} sub="Month to date" colorClass="warning" /></div>
-            </div>
-            <div className="cube-face">
-              <div style={{ width: '100%', height: '100%' }}><KPICard icon={AlertCircle} label="Orders Today" value={kpis?.today_orders} sub="Today's orders" colorClass="danger" /></div>
             </div>
           </div>
         </div>

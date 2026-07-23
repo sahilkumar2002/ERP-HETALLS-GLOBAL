@@ -214,9 +214,9 @@ input, select, textarea { font-family: inherit; outline: none; }
 .kpi-trend.up   { color: var(--success); }
 .kpi-trend.down { color: var(--danger); }
 
-/* ─── 3D 5-Sided Prism ──────────────────────────────────────────────────── */
+/* ─── 3D 4-Sided Prism (Horizontal) ────────────────────────────────────── */
 .cube-container {
-  perspective: 1000px;
+  perspective: 1200px;
   position: relative;
   width: 100%;
   height: 100%;
@@ -227,8 +227,7 @@ input, select, textarea { font-family: inherit; outline: none; }
   height: 100%;
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
-  /* The rotation will be applied inline in React: transform: translateZ(-83px) rotateX(...) */
+  transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
 }
 .cube-face {
   position: absolute;
@@ -238,11 +237,10 @@ input, select, textarea { font-family: inherit; outline: none; }
   -webkit-backface-visibility: hidden;
   display: flex;
 }
-.cube-face:nth-child(1) { transform: rotateX(0deg) translateZ(83px); }
-.cube-face:nth-child(2) { transform: rotateX(-72deg) translateZ(83px); }
-.cube-face:nth-child(3) { transform: rotateX(-144deg) translateZ(83px); }
-.cube-face:nth-child(4) { transform: rotateX(-216deg) translateZ(83px); }
-.cube-face:nth-child(5) { transform: rotateX(-288deg) translateZ(83px); }
+.cube-face:nth-child(1) { transform: rotateY(0deg) translateZ(140px); }
+.cube-face:nth-child(2) { transform: rotateY(90deg) translateZ(140px); }
+.cube-face:nth-child(3) { transform: rotateY(180deg) translateZ(140px); }
+.cube-face:nth-child(4) { transform: rotateY(-90deg) translateZ(140px); }
 
 /* ─── Cards / Panels ────────────────────────────────────────────────── */
 .card {
