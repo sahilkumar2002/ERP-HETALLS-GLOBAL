@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts'
 
@@ -313,22 +314,22 @@ export default function Dashboard() {
             </div>
           </div>
           <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={revenueChart} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
+            <LineChart data={revenueChart} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="month" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v/1000}k`} />
-              <Tooltip content={<ChartTooltip />} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Tooltip content={<ChartTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 2 }} />
+              <Legend wrapperStyle={{ fontSize: 12, paddingTop: '10px' }} iconType="circle" />
               
-              <Bar dataKey="ETSY-CASAVANI" name="Etsy-Casavani" fill="#f87171" stackId="a" />
-              <Bar dataKey="AMAZON" name="Amazon" fill="#f59e0b" stackId="a" />
-              <Bar dataKey="ETSY-RUGSFOREVER" name="Etsy-Rugsforever" fill="#fb923c" stackId="a" />
-              <Bar dataKey="WALMART" name="Walmart" fill="#3b82f6" stackId="a" />
-              <Bar dataKey="PEPPERFRY" name="Pepperfry" fill="#ef4444" stackId="a" />
-              <Bar dataKey="CASAVANI WEBSITE" name="Casavani Website" fill="#10b981" stackId="a" />
-              <Bar dataKey="EBAY-RUGSFOREVER" name="Ebay-Rugsforever" fill="#8b5cf6" stackId="a" />
-              <Bar dataKey="JAYPOR" name="Jaypor" fill="#ec4899" stackId="a" />
-            </BarChart>
+              <Line type="monotone" dataKey="ETSY-CASAVANI" name="Etsy-Casavani" stroke="#f87171" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} />
+              <Line type="monotone" dataKey="AMAZON" name="Amazon" stroke="#f59e0b" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} />
+              <Line type="monotone" dataKey="ETSY-RUGSFOREVER" name="Etsy-Rugsforever" stroke="#fb923c" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} />
+              <Line type="monotone" dataKey="WALMART" name="Walmart" stroke="#3b82f6" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} />
+              <Line type="monotone" dataKey="PEPPERFRY" name="Pepperfry" stroke="#ef4444" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} />
+              <Line type="monotone" dataKey="CASAVANI WEBSITE" name="Casavani Website" stroke="#10b981" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} />
+              <Line type="monotone" dataKey="EBAY-RUGSFOREVER" name="Ebay-Rugsforever" stroke="#8b5cf6" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} />
+              <Line type="monotone" dataKey="JAYPOR" name="Jaypor" stroke="#ec4899" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} />
+            </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
