@@ -179,9 +179,13 @@ export default function Dashboard() {
     <div>
       {/* KPI Grid */}
       <div className="kpi-grid">
-        <div style={{ position: 'relative' }}>
-          <div onClick={() => setShowRevDrop(!showRevDrop)} style={{ cursor: 'pointer' }}>
-            <KPICard icon={DollarSign} label="Total Revenue (Click Me)" value={kpis?.total_revenue} sub="Monthly Brands, USD" colorClass="gold" format="currency" />
+        <div 
+          style={{ position: 'relative' }}
+          onMouseEnter={() => setShowRevDrop(true)}
+          onMouseLeave={() => setShowRevDrop(false)}
+        >
+          <div style={{ cursor: 'pointer' }}>
+            <KPICard icon={DollarSign} label="Total Revenue" value={kpis?.total_revenue} sub="Monthly Brands, USD" colorClass="gold" format="currency" />
           </div>
           {showRevDrop && (
             <div style={{
@@ -245,14 +249,6 @@ export default function Dashboard() {
                 </p>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                {!bdLoading && bdData && bdData.total_rows > 0 && (
-                  <div style={{ textAlign: 'right', background: 'rgba(245, 158, 11, 0.1)', padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Sales</div>
-                    <div style={{ fontSize: '16px', fontWeight: 700, color: '#f59e0b' }}>
-                      ${calculateBdTotal().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </div>
-                  </div>
-                )}
                 <button onClick={() => setShowBreakdown(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20} /></button>
               </div>
             </div>
@@ -271,6 +267,14 @@ export default function Dashboard() {
                 <input type="date" value={bdCustomEndDate} onChange={e => setBdCustomEndDate(e.target.value)} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '6px 10px', color: 'var(--text-primary)', fontSize: '12px' }} />
                 <button className={`breakdown-tab ${bdTab === 'custom' ? 'active' : ''}`} onClick={handleBdCustom}>Go</button>
               </div>
+              {!bdLoading && bdData && bdData.total_rows > 0 && (
+                <div style={{ marginLeft: 'auto', textAlign: 'right', background: 'rgba(245, 158, 11, 0.1)', padding: '4px 12px', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
+                  <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Sales</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#f59e0b' }}>
+                    ${calculateBdTotal().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="breakdown-content">
               {bdLoading ? (

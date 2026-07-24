@@ -23,16 +23,15 @@ def fetch_sheet_csv(sheet_name):
 
 @router.get("/kpis")
 def get_kpis(current_user=Depends(get_current_user)):
-    # Fetch MONTHLY BRANDS
-    brands_data = fetch_sheet_csv("MONTHLY BRANDS")
+    # Fetch DAILY SALE BRANDS N PORTAL for total revenue to match the breakdown modal
+    daily_sales_data = fetch_sheet_csv("DAILY SALE BRANDS N PORTAL")
     total_revenue = 0.0
-    for row in brands_data[1:]:  # Skip header
+    for row in daily_sales_data[2:]:  # Skip headers
         if len(row) > 1 and row[1]:
             try:
                 # Remove commas and $ if any
                 val_str = row[1].replace(',', '').replace('$', '').strip()
-                if val_str.lower() != 'total':
-                    total_revenue += float(val_str)
+                total_revenue += float(val_str)
             except ValueError:
                 pass
 
